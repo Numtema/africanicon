@@ -2,10 +2,11 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { IconSuggestion, AfricanPalette, IconStyle, IconSettings } from "../types";
 
-const API_KEY = process.env.API_KEY || "";
+// Always obtain API key directly from process.env.API_KEY
 
 export const analyzeProjectContent = async (content: string, palette: AfricanPalette): Promise<IconSuggestion[]> => {
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  // Initialize GoogleGenAI with named parameter apiKey from process.env.API_KEY
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const prompt = `Fais un audit complet et exhaustif du contenu ou de la description suivante : "${content}". 
   Identifie TOUTES les icônes d'interface utilisateur nécessaires pour ce projet, sans limite de nombre (propose en 20 ou plus si le projet est complexe). 
@@ -35,6 +36,7 @@ export const analyzeProjectContent = async (content: string, palette: AfricanPal
   });
 
   try {
+    // response.text is a property, not a method
     return JSON.parse(response.text || "[]");
   } catch (e) {
     console.error("Failed to parse suggestions", e);
@@ -111,7 +113,8 @@ export const generateAfricanIcon = async (
   style: IconStyle,
   settings?: IconSettings
 ): Promise<string | null> => {
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  // Create fresh instance per call as per recommended practices for handling dynamic API keys
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const intensityPrompt = settings ? `
     Line thickness: ${settings.lineThickness}%, 
@@ -133,6 +136,7 @@ export const generateAfricanIcon = async (
     config: { imageConfig: { aspectRatio: "1:1" } }
   });
 
+  // Iterate through parts to find the image part
   for (const part of response.candidates?.[0]?.content?.parts || []) {
     if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
   }
@@ -146,7 +150,8 @@ export const refineAfricanIcon = async (
   style: IconStyle,
   settings?: IconSettings
 ): Promise<string | null> => {
-  const ai = new GoogleGenAI({ apiKey: API_KEY });
+  // Create fresh instance per call
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const base64Data = base64Image.includes('base64,') ? base64Image.split('base64,')[1] : base64Image;
 
   const finalPrompt = `Modify this African icon: "${refinementInstruction}".
@@ -165,6 +170,7 @@ export const refineAfricanIcon = async (
     config: { imageConfig: { aspectRatio: "1:1" } }
   });
 
+  // Iterate through parts to find the image part
   for (const part of response.candidates?.[0]?.content?.parts || []) {
     if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
   }
