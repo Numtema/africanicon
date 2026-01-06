@@ -29,7 +29,30 @@ export type IconStyle =
   | 'Isometric Light'
   | 'Monochrome Symbolic'
   | 'Pictogramme e-Gov'
-  | 'Cultural-Minimal';
+  | 'Cultural-Minimal'
+  | 'Manga Line Art'
+  | 'Anime Flat Color'
+  | 'Chibi Icons'
+  | 'Pixel Art'
+  | 'Cyber Anime'
+  | 'Mecha Tech'
+  | 'Noir & Blanc Cinéma'
+  | 'Comic Book'
+  | 'Illustration Vintage'
+  | 'Afro-Anime'
+  | 'Symbolic Mythic'
+  | 'Clay Stop Motion'
+  | 'Hand-Drawn Sketch'
+  | 'Generative Abstract'
+  | 'Wood Carved'
+  | 'Wood Burned'
+  | 'Slate Ardoise'
+  | 'Chalk Craie'
+  | 'Stone Engraved'
+  | 'Parchment'
+  | 'Ink & Quill'
+  | 'Fabric Textile'
+  | 'Clay Terracotta';
 
 export interface Project {
   id: string;
