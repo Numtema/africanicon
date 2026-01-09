@@ -2,17 +2,24 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { IconSuggestion, AfricanPalette, IconStyle, IconSettings } from "../types";
 
-// Always obtain API key directly from process.env.API_KEY
+const cleanJsonResponse = (text: string): string => {
+  const jsonMatch = text.match(/\[[\s\S]*\]|\{[\s\S]*\}/);
+  return jsonMatch ? jsonMatch[0] : text;
+};
 
 export const analyzeProjectContent = async (content: string, palette: AfricanPalette): Promise<IconSuggestion[]> => {
-  // Initialize GoogleGenAI with named parameter apiKey from process.env.API_KEY
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
-  const prompt = `Fais un audit complet et exhaustif du contenu ou de la description suivante : "${content}". 
-  Identifie TOUTES les icônes d'interface utilisateur nécessaires pour ce projet, sans limite de nombre (propose en 20 ou plus si le projet est complexe). 
-  Pour chaque icône, propose un style africain moderne inspiré de l'esthétique ${palette}. 
-  Le style doit être minimaliste, institutionnel et culturellement riche.
-  Retourne le résultat sous forme d'un tableau JSON d'objets.`;
+  const prompt = `EXPERTISE UI/UX & BRANDING :
+  Projet : "${content}"
+  Esthétique : Modernité Africaine (${palette})
+  
+  Tâche : Identifie les logos et icônes d'application nécessaires.
+  Focus : Pense en termes d'icône d'App Store, logo de barre de navigation, icônes de fonctionnalités clés.
+  Propose au moins 10 concepts. 
+  Pour chaque concept, explique comment intégrer des motifs africains de manière moderne et minimaliste.
+  
+  RÉPONDS UNIQUEMENT AVEC UN TABLEAU JSON VALIDE.`;
 
   const response = await ai.models.generateContent({
     model: "gemini-3-flash-preview",
@@ -36,67 +43,37 @@ export const analyzeProjectContent = async (content: string, palette: AfricanPal
   });
 
   try {
-    // response.text is a property, not a method
-    return JSON.parse(response.text || "[]");
+    const rawText = response.text || "[]";
+    const cleanedJson = cleanJsonResponse(rawText);
+    return JSON.parse(cleanedJson);
   } catch (e) {
     console.error("Failed to parse suggestions", e);
-    return [];
+    throw new Error("Erreur de lecture. Réessayez.");
   }
 };
 
-const styleDescriptions: Record<IconStyle, string> = {
-  'Glassmorphism': "frosted glass effect, semi-transparent, blurred, ethereal",
+const styleDescriptions: Record<string, string> = {
+  'Glassmorphism': "frosted glass effect, semi-transparent, blurred backdrop, high-end app icon aesthetic",
   'Liquid Glass': "fluid organic shapes, high gloss, caustic light reflections",
   'Playful Cartoon': "rounded, bold colors, thick outlines, puffy 3D",
-  '3D Glossy': "premium 3D render, high-shine, studio lighting, depth",
-  'Flat Minimalist': "2D vector, clean lines, solid fills, no shadows",
+  '3D Glossy': "premium 3D render, high-shine, studio lighting, depth, app store style",
+  'Flat Minimalist': "2D vector, clean lines, solid fills, no shadows, modern logo aesthetic",
   'Cyberpunk African': "neon glowing edges, dark metallic, futuristic patterns",
   'Outline / Line': "Thin elegant lines, minimal strokes, high legibility",
   'Duotone': "Two-tone contrast, clear hierarchy, dual-color fill",
   'Semi-Flat': "Flat design with subtle depth and warm shadows",
-  'Neo-Institutional': "Stable geometric forms, official seal style, majestic",
+  'Neo-Institutional': "Stable geometric forms, official seal style, majestic logo",
   'Isometric Light': "Light 2.5D perspective, structural, professional",
-  'Monochrome Symbolic': "Single solid color, high contrast, universal strength",
+  'Smartphone': "Centered icon, consistent padding, mobile app icon style, high legibility on small screens",
   'Pictogramme e-Gov': "Functional, ISO-standardized, official government look",
   'Cultural-Minimal': "Minimalist flat with subtle non-figurative African patterns",
-  'Manga Line Art': "Expressive black line art, shonen manga ink strokes",
-  'Anime Flat Color': "Clean flat cell-shading, bold colors, simple shadows",
-  'Chibi Icons': "Cute super-deformed style, large features, rounded",
-  'Pixel Art': "Retro 16-bit pixel art, visible grid, vibrant",
-  'Cyber Anime': "Neon Japanese style, glowing lines, high-tech energy",
-  'Mecha Tech': "Mechanical anime style, robotic details, sharp angles",
-  'Noir & Blanc Cinéma': "High-contrast cinematic lighting, noir aesthetic",
-  'Comic Book': "Thick outlines, halftone dots, vibrant US comic style",
-  'Illustration Vintage': "Retro 60s-80s flat illustration, muted nostalgic colors",
-  'Afro-Anime': "Fusion of anime line-art with African geometric patterns",
-  'Symbolic Mythic': "Abstract symbolic forms from ancient myths, spiritual",
-  'Clay Stop Motion': "Handcrafted clay modeled effect, visible fingerprints",
-  'Hand-Drawn Sketch': "Authentic pencil/ink sketch, human touch, hatch lines",
-  'Generative Abstract': "Algorithmic generative art, fluid mathematical curves",
-  'Wood Carved': "Deeply carved wood, visible grain, rustic texture",
-  'Wood Burned': "Pyrography, burned wood symbols, scorched edges",
-  'Slate Ardoise': "Engraved on dark slate background, scholarly",
-  'Chalk Craie': "Chalk on blackboard, dusty irregular texture, educational",
-  'Stone Engraved': "Monumental stone carving, chiseled ancient heritage",
-  'Parchment': "Ink-drawn on aged parchment paper, antique vibe",
-  'Ink & Quill': "Quill calligraphy, slight ink bleeds, manuscript style",
-  'Fabric Textile': "Symbols woven into textile grid, Bogolan/Kente weave",
-  'Clay Terracotta': "Hand-modeled terracotta, warm orange-red matte",
   'Gradient Smooth': "Smooth fluid gradients, clean transitions, modern professional",
   'Gradient Neon': "Vibrant neon gradients, glowing edges, high-energy glow",
-  'Mesh Gradient': "Organic diffuse mesh gradients, high-end premium design",
-  'Bubble Icons': "Inflated round bubble shapes, puffy soft UI effect",
-  'Neumorphism': "Soft relief, inner and outer shadows, tactile material feel",
-  'Glass Bubble': "Translucent glass bubbles, liquid refractions, futuristic",
-  'Street Art / Graffiti': "Free strokes, spray paint effect, raw street energy",
-  'Marker Posca': "Felt-tip marker strokes, full colors, expressive pedagogical",
-  'Collage Urbain': "Paper cutout effect, superpositions, underground zine style",
+  'Wood Carved': "Deeply carved wood, visible grain, rustic texture",
   'Hiéroglyphe Moderne': "Modernized simplified ancient symbols, geometric heritage",
-  'Pictogramme Ancestral': "Tribal abstract symbols, serious cultural branding",
-  'Glyphes / Runes': "Codified symbolic runes, mystic knowledge, heritage archives",
+  'Afro-Anime': "Fusion of anime line-art with African geometric patterns",
   'Afro-Gradient': "African geometric symbols with modern premium gradients",
-  'Street-Flat Hybrid': "Flat icon with light graffiti texture, culture-legibility balance",
-  'Material-Gradient': "Wood/Stone/Slate material with subtle modern gradient overlays"
+  'Symbolic Mythic': "Abstract symbolic forms from ancient myths, spiritual"
 };
 
 const paletteDescriptions: Record<AfricanPalette, string> = {
@@ -113,7 +90,6 @@ export const generateAfricanIcon = async (
   style: IconStyle,
   settings?: IconSettings
 ): Promise<string | null> => {
-  // Create fresh instance per call as per recommended practices for handling dynamic API keys
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const intensityPrompt = settings ? `
@@ -124,11 +100,12 @@ export const generateAfricanIcon = async (
     Glow effects: ${settings.glowEffect ? 'enabled' : 'disabled'},
     Surface texture: ${settings.textureEnabled ? 'highly visible' : 'minimal'}.` : '';
 
-  const finalPrompt = `Professional app icon for "${suggestion.name}". 
-  Style: ${styleDescriptions[style]}. ${intensityPrompt}
-  Cultural Theme: Modern African Excellence (${paletteDescriptions[palette]}). 
-  Detail: ${suggestion.africanStylingPrompt}. 
-  High-res vector render, solid background, NO text, NO human faces.`;
+  const finalPrompt = `Professional HIGH-FIDELITY APP ICON or LOGO for "${suggestion.name}". 
+  Context: ${suggestion.originalDescription}.
+  Style: ${styleDescriptions[style] || style}. ${intensityPrompt}
+  Cultural Heritage: Modern African Excellence (${paletteDescriptions[palette]}). 
+  Logic: ${suggestion.africanStylingPrompt}. 
+  Requirements: Perfectly centered, isolated on a solid or gradient background, professional branding quality, NO TEXT, NO LETTERS, NO HUMAN FIGURES. High Resolution.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
@@ -136,7 +113,6 @@ export const generateAfricanIcon = async (
     config: { imageConfig: { aspectRatio: "1:1" } }
   });
 
-  // Iterate through parts to find the image part
   for (const part of response.candidates?.[0]?.content?.parts || []) {
     if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
   }
@@ -150,14 +126,13 @@ export const refineAfricanIcon = async (
   style: IconStyle,
   settings?: IconSettings
 ): Promise<string | null> => {
-  // Create fresh instance per call
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const base64Data = base64Image.includes('base64,') ? base64Image.split('base64,')[1] : base64Image;
 
-  const finalPrompt = `Modify this African icon: "${refinementInstruction}".
-  Maintain Rendering Style: ${styleDescriptions[style]} and Palette: ${paletteDescriptions[palette]}.
-  Apply these adjustments: Line thickness ${settings?.lineThickness}%, Roundedness ${settings?.roundedness}%, Cultural details ${settings?.culturalIntensity}%.
-  Keep it as a clean modern UI icon, no text.`;
+  const finalPrompt = `Refine this APP LOGO based on: "${refinementInstruction}".
+  Maintain Logo Style: ${styleDescriptions[style] || style} and Palette: ${paletteDescriptions[palette]}.
+  Apply: Line ${settings?.lineThickness}%, Roundedness ${settings?.roundedness}%, Cultural Essence ${settings?.culturalIntensity}%.
+  Ensure the result is a clean, centered professional app icon without any text.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-2.5-flash-image',
@@ -170,7 +145,6 @@ export const refineAfricanIcon = async (
     config: { imageConfig: { aspectRatio: "1:1" } }
   });
 
-  // Iterate through parts to find the image part
   for (const part of response.candidates?.[0]?.content?.parts || []) {
     if (part.inlineData) return `data:image/png;base64,${part.inlineData.data}`;
   }

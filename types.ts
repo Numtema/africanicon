@@ -25,6 +25,7 @@ export interface IconSettings {
 
 export type AfricanPalette = 'Kente' | 'Bogolan' | 'Safari' | 'ModernSahara' | 'AbidjanNight';
 
+// Fix: Added 'Smartphone' to IconStyle to match its usage in constants.ts
 export type IconStyle = 
   | '3D Glossy' | 'Glassmorphism' | 'Liquid Glass' | 'Playful Cartoon' | 'Flat Minimalist' | 'Cyberpunk African'
   | 'Outline / Line' | 'Duotone' | 'Semi-Flat' | 'Neo-Institutional' | 'Isometric Light' | 'Monochrome Symbolic'
@@ -35,7 +36,7 @@ export type IconStyle =
   | 'Fabric Textile' | 'Clay Terracotta'
   | 'Gradient Smooth' | 'Gradient Neon' | 'Mesh Gradient' | 'Bubble Icons' | 'Neumorphism' | 'Glass Bubble'
   | 'Street Art / Graffiti' | 'Marker Posca' | 'Collage Urbain' | 'Hiéroglyphe Moderne' | 'Pictogramme Ancestral'
-  | 'Glyphes / Runes' | 'Afro-Gradient' | 'Street-Flat Hybrid' | 'Material-Gradient';
+  | 'Glyphes / Runes' | 'Afro-Gradient' | 'Street-Flat Hybrid' | 'Material-Gradient' | 'Smartphone';
 
 export interface Project {
   id: string;
